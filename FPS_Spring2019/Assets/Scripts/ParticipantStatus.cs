@@ -108,6 +108,7 @@ public class ParticipantStatus
         {
             GetNextStimulus();
             this.trial++;
+            GetDataFarmer().Save(new DFAnswerSelection(DFAnswerSelection.START));
         }
         return this.trial;
     }

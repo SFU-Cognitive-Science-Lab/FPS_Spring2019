@@ -72,11 +72,5 @@ public class OnClickButton : MonoBehaviour {
                 ;
             }
         }
-
-
-
-
 	}
-
-    
 }
