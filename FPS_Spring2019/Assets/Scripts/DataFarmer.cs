@@ -19,7 +19,7 @@ public class DataFarmer
 
     // SET BUFFER THRESHHOLD WHICH, WHEN MET, WILL STREAM DATA CHUNKS OUTWARD
     // this can be overridden from the config file
-    private static int BUFFER_FULL = 10;
+    private static int BUFFER_FULL = 1;
     private static int SAVE_RETRIES = 5;
 
     // Webclient needed to save data externally

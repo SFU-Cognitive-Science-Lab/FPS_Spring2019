@@ -26,9 +26,13 @@ public class RotateCube : MonoBehaviour {
     private Vector3 latePos;//mouse's position at last frame
     Transform targetTransform;//the object pointed by mouse
     private float tarRayLength = Mathf.Infinity;
+    private float xRot;
+    private float yRot;
 
     private void Start()
     {
+        xRot = 0;
+        yRot = 0;
         axisX = 0;
         axisY = 0;
         targetTransform = null;
@@ -38,18 +42,26 @@ public class RotateCube : MonoBehaviour {
 
     void Update ()
     {
+        
         float hori = 0;
         float verti = 0;
         verti = Input.GetAxis("Control_Vert");
         hori = Input.GetAxis("Control_Hori");
-        if(Mathf.Abs(verti)>0 || Mathf.Abs(hori) > 0)
+        if (Mathf.Abs(verti) > 0 || Mathf.Abs(hori) > 0)
         {
-            axisX = -hori* 3f;
+            axisX = -hori * 3f;
             axisY = verti * 3f;
             this.transform.Rotate(new Vector3(axisY, axisX, 0), Space.World);
+        } else {
+            /*
+            float joyX = Input.GetAxis("Joystick X");
+            float joyY = Input.GetAxis("Joystick Y");
+            xRot += joyX * 5f; // 5 is "Look sensitivity"
+            yRot += joyY * 5f;
+            xRot = Mathf.Clamp(xRot, -90, 90);
+            this.transform.rotation = Quaternion.Euler(xRot, yRot, 0f);
+            */
         }
-
-
 
         ////parameter 0 refers to left button
         //if (Input.GetMouseButtonDown(0))

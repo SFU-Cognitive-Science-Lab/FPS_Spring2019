@@ -33,7 +33,6 @@ public class ChoiceBehavior : MonoBehaviour
             //collect data
             ps.IncTrial();
             //Debug.Log(string.Format("Starting trial {0} at {1}", ps.GetTrial(), Time.time));
-            ps.GetDataFarmer().Save(new DFAnswerSelection(DFAnswerSelection.START));
             //Despawn current box
             this.GetComponent<DespawnObject>().buttonDespawn();
             for (int i = 0; i < choices.Count; i++)

@@ -10,6 +10,5 @@ public class StartTrial : MonoBehaviour
     {
         ps.IncTrial();
         Debug.Log(string.Format("Starting trial {0} at {1}", ps.GetTrial(), Time.time));
-        ps.GetDataFarmer().Save(new DFAnswerSelection(DFAnswerSelection.START));
     }
 }
