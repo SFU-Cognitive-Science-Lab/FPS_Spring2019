@@ -37,6 +37,7 @@ public class DataFarmer
     private static string REMOTE_URI;
     private static string REMOTE_SECRET;
     private static string ARRANGEMENTS_FILE; // where to store maps of categories to cubes
+    private static long FIRSTPARTICIPANT = -1;
     private static string ARRANGEMENT_DIMS = "3x2"; // type of stimuli to get
     private static readonly string DEFAULT_LOG = "df.csv";
     private static string LOCAL_LOG = DefaultLog();
@@ -115,6 +116,15 @@ public class DataFarmer
                     case "log": LOCAL_LOG = value; break;
                     case "buffer": BUFFER_FULL = int.Parse(value); break;
                     case "arrangements": ARRANGEMENTS_FILE = value; break;
+                    case "firstparticipant":
+                        try
+                        {
+                            long.TryParse(value, out FIRSTPARTICIPANT);
+                        } catch (Exception e)
+                        {
+                            FIRSTPARTICIPANT = -1;
+                        }
+                        break;
                     case "dims":
                         if (dimsPat.IsMatch(value)) { ARRANGEMENT_DIMS = value; }
                         else throw new FormatException("dims should be NxM");
@@ -180,6 +190,24 @@ public class DataFarmer
         if (loggedin)
             return GetRequest(string.Format("{0}/new", REMOTE_URI));
         return NOT_LOGGED_IN;
+    }
+
+    // what is the base participant id?
+    public long FirstParticipant()
+    {
+        if (FIRSTPARTICIPANT <= 0)
+        {
+            string firstie = GetRequest(string.Format("{0}/first", REMOTE_URI));
+            try
+            {
+                long.TryParse(firstie, out FIRSTPARTICIPANT);
+            }
+            catch (Exception e)
+            {
+                throw new InvalidCastException("can't get FIRSTPARTICIPANT - add a firstparticipant option in the config file?");
+            }
+        }
+        return FIRSTPARTICIPANT;
     }
 
     // Saving the Data Chunk to File and remotely

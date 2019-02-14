@@ -206,6 +206,12 @@ public class ParticipantStatus
         return this;
     }
 
+    public ParticipantStatus BuildParticipantFromCondition()
+    {
+        this.participant = GetDataFarmer().FirstParticipant() + this.condition.cubeset * 100 + this.condition.catmap;
+        return this;
+    }
+
     // Convenience methods for getting descriptions of cubes:
     // a run is a series of trials that iterate through a list of cubes
     // when we get the end of a list we generate another 
