@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using UnityEngine;
 
-public class DataFarmer
+public class DataFarmer 
 {
 
     // 
@@ -131,7 +131,7 @@ public class DataFarmer
                         break;
                     default: Debug.Log(string.Format("don't know what {0} is", name)); continue;
                 }
-                //Debug.Log(string.Format("set '{0}' to '{1}'.\n", name, value));
+                Debug.Log(string.Format("set '{0}' to '{1}'.\n", name, value));
             }
         }
     }
@@ -140,10 +140,10 @@ public class DataFarmer
     public DataFarmer SetConfigFile(string fname)
     {
         CONFIG_FILE = fname;
-        //Debug.Log("reset config file to " + CONFIG_FILE);
+        Debug.Log("reset config file to " + CONFIG_FILE);
         if (File.Exists(CONFIG_FILE))
         {
-            //Debug.Log("updating configuration");
+            Debug.Log("updating configuration");
             GetConfig();
         }
         return this;
@@ -234,7 +234,7 @@ public class DataFarmer
             {
                 try
                 {
-                    //Debug.Log("Data Moving to File!");
+                    Debug.Log("Data Moving to File!");
                     using (StreamWriter file = File.AppendText(LOCAL_LOG))
                     {
                         file.Write(dataString);
@@ -243,7 +243,7 @@ public class DataFarmer
                 }
                 catch (Exception e)
                 {
-                    //Debug.Log(string.Format("failed to write to log: {0} {1}", e, e.Message));
+                    Debug.Log(string.Format("failed to write to log: {0} {1}", e, e.Message));
                 }
             }
 
@@ -255,7 +255,7 @@ public class DataFarmer
             data.Clear();
             if (!anythingsaved)
             {
-                //Debug.Log("ERROR: NO DATA COULD BE SAVED!");
+                Debug.Log("ERROR: NO DATA COULD BE SAVED!");
                 throw new Exception("no data can be saved");
             }
         }
@@ -280,24 +280,24 @@ public class DataFarmer
                     saved = false;
                     string uri = string.Format("{0}/save/{1}", REMOTE_URI, participant);
                     string result = PostRequest(uri, dataString);
-                    //Debug.Log("save result: " + result);
+                    Debug.Log("save result: " + result);
                     if (result.StartsWith("OK"))
                     {
-                        //Debug.Log("confirmed save");
+                        Debug.Log("confirmed save");
                         saved = true;
                     }
                     else
                     {
                         tries--;
                         if (tries <= 0) break;
-                        //Debug.Log("failed trying to log in again " + tries + " tries left");
+                        Debug.Log("failed trying to log in again " + tries + " tries left");
                         Thread.Sleep(SAVE_RETRIES - tries * 500); // ms to wait before trying again
                         Login();
                     }
                 } while (loggedin && !saved);
                 if (!saved)
                 {
-                    //Debug.Log("ERROR: NOT ABLE TO SAVE DATA REMOTELY!");
+                    Debug.Log("ERROR: NOT ABLE TO SAVE DATA REMOTELY!");
                 }
             }
         }
@@ -323,13 +323,13 @@ public class DataFarmer
         loggedin = false;
         if (REMOTE_URI == null || REMOTE_SECRET == null)
         {
-            //Debug.Log("DataFarmer missing configuation needed to log in!");
+            Debug.Log("DataFarmer missing configuation needed to log in!");
             return false;
         }
         using (webClient = GetNewWebClient())
         {
             string content = webClient.DownloadString(makeNonce().Uri(string.Format("{0}/login", REMOTE_URI)));
-            //Debug.Log("login result: " + content);
+            Debug.Log("login result: " + content);
             if (!content.Contains("ERROR:"))
             {
                 loggedin = true;
@@ -338,11 +338,11 @@ public class DataFarmer
             int i = 0;
             for (; i < headers.Count; i++)
             {
-                //Debug.Log(headers.GetKey(i) + ": " + headers.Get(i));
+                Debug.Log(headers.GetKey(i) + ": " + headers.Get(i));
                 if (headers.GetKey(i) == "Set-Cookie")
                 {
                     auth = headers.Get(i);
-                    //Debug.Log(string.Format("{0}", auth));
+                    Debug.Log(string.Format("{0}", auth));
                     break;
                 }
             }
