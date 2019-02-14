@@ -8,7 +8,7 @@ public class ButtonDoStuff : MonoBehaviour
 {
 
     public Button apply;
-    public InputField participantID;
+    // public InputField participantID;
     public InputField cubeset;
     public InputField arrangement;
     public GameObject menu;
@@ -23,22 +23,22 @@ public class ButtonDoStuff : MonoBehaviour
     void Start()
     {
         apply.onClick.AddListener(SetParticipantCondition);
-        participantID.text = ps.GetParticipantAsString();
-        ps.ConditionFromParticipant();
-        ParticipantStatus.Condition cond = ps.GetCondition();
-        cubeset.text = cond.cubeset.ToString();
-        arrangement.text = cond.catmap.ToString();
+        // Cal says: all this is going to be done manually
+        // participantID.text = ps.GetParticipantAsString();
+        // ps.ConditionFromParticipant();
+        // ParticipantStatus.Condition cond = ps.GetCondition();
+        cubeset.text = "";
+        arrangement.text = "";
     }
 
     // in order for this to work we need an EventSystem component 
     void SetParticipantCondition()
     {
-        ps.SetParticipant(participantID.text);
+        ps.SetCondition(int.Parse(cubeset.text), int.Parse(arrangement.text)).BuildParticipantFromCondition();
         if (ps.GetParticipant() > 0)
         {
             menu.SetActive(false);
             controInfo.SetActive(true);
-            ps.SetCondition(int.Parse(cubeset.text), int.Parse(arrangement.text));
             Debug.Log("condition " + ps.GetCondition() + " for " + ps.GetParticipant());
         }
     }
