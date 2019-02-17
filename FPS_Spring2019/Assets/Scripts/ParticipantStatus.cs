@@ -219,11 +219,13 @@ public class ParticipantStatus
     private int Cube = -1;
     public CubeTuple GetNextStimulus()
     {
-        Cube++;
-        if (Cubes == null || Cube == Cubes.Count)
+        if (Cubes == null || Cube >= Cubes.Count - 1)
         {
             ResetCubes();
-            Cube = 0;
+        } 
+        else
+        {
+            Cube++;
         }
         this.trialStart = true;
         Debug.Log(string.Format("Next stimulus: {0}", Cubes[Cube]));
@@ -238,11 +240,12 @@ public class ParticipantStatus
     }
 
     // make a random permutation of a given list of cubes
-    private void ResetCubes()
+    public void ResetCubes()
     {
         if (this.condition == null)
             throw new ArgumentException("Need to set a condition for this participant!");
         Cubes = GetDataFarmer().CubeLists.Shuffle(this.condition);
+        Cube = 0;
     }
 
     // used in the UI to set the set of cube/category mappings the participant will be learning
