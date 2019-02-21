@@ -108,7 +108,8 @@ public class ParticipantStatus
         {
             GetNextStimulus();
             this.trial++;
-            GetDataFarmer().Save(new DFAnswerSelection(DFAnswerSelection.START));
+            bool saveme = true;
+            GetDataFarmer().Save(new DFAnswerSelection(DFAnswerSelection.START), saveme);
         }
         return this.trial;
     }
@@ -228,7 +229,6 @@ public class ParticipantStatus
             Cube++;
         }
         this.trialStart = true;
-        Debug.Log(string.Format("Next stimulus: {0}", Cubes[Cube]));
         return Cubes[Cube];
     }
 

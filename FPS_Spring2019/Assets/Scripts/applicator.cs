@@ -43,7 +43,6 @@ public class applicator : MonoBehaviour
     Material[] createSet()
     {
         CubeTuple c = ParticipantStatus.GetInstance().GetCube();
-        Debug.Log(string.Format("rendering {0}", c));
         Material[] matlist = rend.materials;
         matlist[0] = material[0];
         foreach (ColorShapeRotation csr in c.cube)

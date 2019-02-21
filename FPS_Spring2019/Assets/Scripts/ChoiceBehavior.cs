@@ -29,8 +29,11 @@ public class ChoiceBehavior : MonoBehaviour
     {
         if (clickedTag == "NEXT")
         {
+            if (ps.GetTrial() > 0 && !ps.ChoiceMade()) return;
+
             //Debug.Log("nex~~~~~");
             //collect data
+            Debug.Log("Incrementing Trial");
             ps.IncTrial();
             //Debug.Log(string.Format("Starting trial {0} at {1}", ps.GetTrial(), Time.time));
             //Despawn current box

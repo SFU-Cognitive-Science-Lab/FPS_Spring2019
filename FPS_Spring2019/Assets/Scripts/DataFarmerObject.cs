@@ -8,6 +8,7 @@ public class DataFarmerObject : IDataFarmerObject
     public long trial;
     public ParticipantStatus.Condition condition;
     public string category;
+    protected CubeTuple cube;
 
     public DataFarmerObject(string tag)
     {
@@ -18,6 +19,7 @@ public class DataFarmerObject : IDataFarmerObject
         this.trial = ps.GetTrial();
         this.condition = ps.GetCondition();
         this.category = ps.GetCategory();
+        this.cube = ps.GetCube();
     }
     public float GetTimestamp()
     {
@@ -37,7 +39,7 @@ public class DataFarmerObject : IDataFarmerObject
     }
     public virtual string Serialize()
     {
-        return string.Format("{0},{1},{2},{3},{4},{5}",
-            tag, participant, timestamp, condition, trial, category);
+        return string.Format("{0},{1},{2},{3},{4},{5},{6}",
+            tag, participant, timestamp, condition, trial, cube, category);
     }
 }

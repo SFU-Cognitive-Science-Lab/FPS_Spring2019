@@ -21,6 +21,8 @@ public class OnClickButton : MonoBehaviour {
     public GameObject gameManager;
     public string choice;
 
+    private ParticipantStatus ps = ParticipantStatus.GetInstance();
+
     private Vector3 nowPos;//mouse's positon at current frame
     Transform targetTransform;//the object pointed by mouse
     private float tarRayLength = Mathf.Infinity;
@@ -34,6 +36,7 @@ public class OnClickButton : MonoBehaviour {
         everChoose = false;
         value = 0;
         buttonName = "Chose" + this.GetComponent<CustomTag>().getTag(0);
+        Debug.Log(buttonName);
     }
 	
 	// Update is called once per frame

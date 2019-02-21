@@ -28,10 +28,10 @@ public class CubeTuple
     }
     public override string ToString()
     {
-        string cubeStr = string.Format("Answer: {0} cube: ", GetCategory());
-        foreach (ColorShapeRotation side in cube)
+        string cubeStr = string.Format("cat: {0} cube:", GetCategory());
+        foreach (ColorShapeRotation csr in cube)
         {
-            cubeStr += side;
+            cubeStr = string.Concat(cubeStr, string.Format("/{0}{1}", csr.color, csr.shape));
         }
         return cubeStr;
     }
