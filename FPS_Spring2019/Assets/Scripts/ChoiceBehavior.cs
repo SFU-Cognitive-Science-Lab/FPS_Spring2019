@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 /*
 * 
@@ -33,8 +34,13 @@ public class ChoiceBehavior : MonoBehaviour
 
             //Debug.Log("nex~~~~~");
             //collect data
+            if (ps.IsFinished())
+            {
+                SceneManager.LoadScene("FinalScene", LoadSceneMode.Single);
+            }
             Debug.Log("Incrementing Trial");
             ps.IncTrial();
+
             //Debug.Log(string.Format("Starting trial {0} at {1}", ps.GetTrial(), Time.time));
             //Despawn current box
             this.GetComponent<DespawnObject>().buttonDespawn();

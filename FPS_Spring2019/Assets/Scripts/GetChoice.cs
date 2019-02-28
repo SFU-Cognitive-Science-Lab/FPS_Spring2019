@@ -9,7 +9,8 @@ public class GetChoice : MonoBehaviour
     {
         if (ps.SetChoice(choice))
         {
-            ps.GetDataFarmer().Save(new DFAnswerSelection());
+            bool saveme = true;
+            ps.GetDataFarmer().Save(new DFAnswerSelection(), saveme);
             Debug.Log(string.Format("Answer selected: {0}", ps.GetLastChoice()));
         }
     }
