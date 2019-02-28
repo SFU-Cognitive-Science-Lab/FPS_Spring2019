@@ -19,7 +19,7 @@ public class DataFarmer
 
     // SET BUFFER THRESHHOLD WHICH, WHEN MET, WILL STREAM DATA CHUNKS OUTWARD
     // this can be overridden from the config file
-    private static int BUFFER_FULL = 1;
+    private static int BUFFER_FULL = 10;
     private static int SAVE_RETRIES = 5;
 
     // Webclient needed to save data externally
@@ -33,6 +33,7 @@ public class DataFarmer
     public static readonly string NOT_LOGGED_IN = "ERROR: not logged in";
 
     // for GetConfig below
+    public static int TRIALS = -1; // if TRIALS is <= 0 go on forever
     private static string CONFIG_FILE;
     private static string REMOTE_URI;
     private static string REMOTE_SECRET;
@@ -116,6 +117,15 @@ public class DataFarmer
                     case "log": LOCAL_LOG = value; break;
                     case "buffer": BUFFER_FULL = int.Parse(value); break;
                     case "arrangements": ARRANGEMENTS_FILE = value; break;
+                    case "trials":
+                        try
+                        {
+                            int.TryParse(value, out TRIALS);
+                        } catch (Exception e)
+                        {
+                            TRIALS = -1;
+                        }
+                        break;
                     case "firstparticipant":
                         try
                         {
@@ -212,14 +222,14 @@ public class DataFarmer
 
     // Saving the Data Chunk to File and remotely
     // on error does a lot of complaining and will throw an exception if no data can be saved
-    public void Save(DataFarmerObject thingToSave)
+    public void Save(DataFarmerObject thingToSave, bool saveme=false)
     {
 
         // Since this section is called every frame, the data.add line will continue 
         // to receive a new line of data on every iteration until the BUFFER is reached
         data.Add(thingToSave);
 
-        if (data.Count == BUFFER_FULL)
+        if (saveme || data.Count == BUFFER_FULL)
         {
             bool anythingsaved = false;
             // Serialize data structure
