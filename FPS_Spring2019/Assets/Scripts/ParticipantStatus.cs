@@ -114,6 +114,15 @@ public class ParticipantStatus
         return this.trial;
     }
 
+    public bool IsFinished()
+    {
+        if (DataFarmer.TRIALS > 0 && this.trial >= DataFarmer.TRIALS)
+        {
+            return true;
+        }
+        return false;
+    }
+
     public long GetTrial()
     {
         return this.trial;

@@ -33,6 +33,7 @@ public class DataFarmer
     public static readonly string NOT_LOGGED_IN = "ERROR: not logged in";
 
     // for GetConfig below
+    public static int TRIALS = -1; // if TRIALS is <= 0 go on forever
     private static string CONFIG_FILE;
     private static string REMOTE_URI;
     private static string REMOTE_SECRET;
@@ -116,6 +117,15 @@ public class DataFarmer
                     case "log": LOCAL_LOG = value; break;
                     case "buffer": BUFFER_FULL = int.Parse(value); break;
                     case "arrangements": ARRANGEMENTS_FILE = value; break;
+                    case "trials":
+                        try
+                        {
+                            int.TryParse(value, out TRIALS);
+                        } catch (Exception e)
+                        {
+                            TRIALS = -1;
+                        }
+                        break;
                     case "firstparticipant":
                         try
                         {
