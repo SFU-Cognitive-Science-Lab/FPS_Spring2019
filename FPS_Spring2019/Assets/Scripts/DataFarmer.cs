@@ -425,7 +425,7 @@ public class DataFarmer
             string content = null;
             try
             {
-                webClient.DownloadString(makeNonce().Uri(string.Format("{0}/login", REMOTE_URI)));
+                content = webClient.DownloadString(makeNonce().Uri(string.Format("{0}/login", REMOTE_URI)));
                 webClientValid = WebClientState.CONNECTED;
             }
             catch (Exception e)
