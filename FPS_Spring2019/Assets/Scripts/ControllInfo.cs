@@ -40,11 +40,11 @@ public class ControllInfo : MonoBehaviour {
     void Update ()
     {
         count++;
-        if(count==59)
+        if(count==19)
         {
             count = 0;
         }
-        if(count%60 == 0)
+        if(count%20 == 0)
         {
             permitChoice = true;
         }
