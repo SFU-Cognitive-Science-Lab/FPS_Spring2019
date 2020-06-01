@@ -5,6 +5,10 @@ library(lme4)
 library(dplyr)
 #install.packages("ggplot2")
 library(ggplot2)
+#install.packages("car")
+library(car)
+#install.packages("lmerTest")
+library(lmerTest)
 
 #Set the directory to wherever you have the file installed
 setwd("C:/Users/Justin 2/Desktop/School Docs/CSL/VR")
@@ -59,6 +63,8 @@ learned %>%
 
 
 
+
+
 #-----Chi Square-----
 
 #The goodness of fit test looks for a difference in proportion of learners between the two groups
@@ -71,6 +77,8 @@ chi$expected
 
 
 
+
+
 #-----Mann-Whitney U Test-----
 
 #Since normality assumption of T test was heavily violated, I used the non-parametric Mann-Whitney U Test (uses median instead of mean)
@@ -80,105 +88,151 @@ wilcox.test(learned$cp[learned$condition == "3D"],learned$cp[learned$condition =
 
 
 
-#-----ANOVA-----
-
-#These ANOVAs are essentially basic lms to control for some of the stronger effects and see which variables VR differs from 3D
-#Bonferroni correction must be considered for all output F statistics in each ANOVA test (.05/4 = .0125)
-#Accuracy (transformed with square root due to non-linearity)
-fit.aov <- aov(sqrt(meanAccuracy) ~ bin + learner + condition + as.factor(subject), data = dat)
-summary(fit.aov)
-#When controlling for bin, learner, and subject, condition approaches significance (F = 4.807, p = .0286)
-
-#Optimization
-fit.aov2 <- aov(optimization ~ bin + learner + condition + as.factor(subject), data = dat)
-summary(fit.aov2)
-#When controlling for bin, learner, and subject, condition has a significant effect (F = 108.218, p < 2e-16)
-
-#Fixation Duration (multiple assumption violations, ANOVA might have high error rates)
-fit.aov3 <- aov(fixDuration ~ bin + learner + condition + as.factor(subject), data = dat)
-summary(fit.aov3)
-#When controlling for bin, learner, and subject, condition does not have a significant effect (F = .499, p = .4799)
-
-#Fixation Count (transformed with square root due to non-linearity)
-fit.aov4 <- aov(sqrt(fixCount) ~ bin + learner + condition + as.factor(subject), data = dat)
-summary(fit.aov4)
-#When controlling for bin, learner, and subject, condition has a significant effect (F = 41.76, p = 1.6e-10)
-
 
 
 #-----Modelling-----
 
+#These controll for bin and subject effects and see which variables VR differs from 3D
+#the 4 t tests were considered at a bonferroni corrected significance level (.05/4 = .0125)
+#Accuracy
+fit.accuracy <- lmer(meanAccuracy ~ poly(bin, 4) + condition + (1 | subject), data = learned)
+summary(fit.accuracy)
+#this predicts values of the model so that it can be graphed later
+predict.accuracy <- data.frame(y.hat = predict(fit.accuracy, learned), bin = learned$bin)
+#When controlling for bin and subject, condition does not have a significant effect (t = .137, p = .89120)
+
+#Optimization
+fit.optimization <- lmer(optimization ~ bin + condition + (1 | subject), data = learned)
+summary(fit.optimization)
+predict.optimization <- data.frame(y.hat = predict(fit.optimization, learned), bin = learned$bin)
+#When controlling for bin and subject, condition does not have a significant effect (t = 1.528, p = .1320)
+
+#Fixation Duration (multiple assumption violations, ANOVA might have high error rates)
+  #create dataset to exclude outliers (and NAs) excluded trial 1 from subject 20414 and all trials from subject 30513 
+learned1 <- subset(learned, subset = learned$fixDuration < 10000)
+fit.fixDuration <- lmer(fixDuration ~ poly(bin, 3) + condition + (1 | subject), data = learned1)
+summary(fit.fixDuration)
+predict.fixDuration <- data.frame(y.hat = predict(fit.fixDuration, learned1), bin = learned1$bin)
+#When controlling for bin and subject, condition does not have a significant effect (t = -.371, p = .712)
+
+#Fixation Count
+fit.fixCount <- lmer(fixCount ~ poly(bin, 3) + condition + (1 | subject), data = learned)
+summary(fit.fixCount)
+predict.fixCount <- data.frame(y.hat = predict(fit.fixCount, learned), bin = learned$bin)
+#When controlling for bin and subject, condition has a significant effect (t = 2.636, p = .0108)
+
+
+
+
+
+#-----Graphing-----
+
 #this is a boxplot with smooth line for the dataset (blue) and smooth line for best model (red)
-ggplot(dat, aes(bin, meanAccuracy)) +
+#Accuracy
+ggplot(learned, aes(bin, meanAccuracy)) +
   geom_boxplot(mapping = aes(as.factor(bin), meanAccuracy)) +
   geom_smooth(method = "loess") +
-  geom_smooth(mapping = aes(bin, y.hat), data = predict.mixed, method = "loess", color = 'red')
+  geom_smooth(mapping = aes(bin, y.hat), data = predict.accuracy, method = "loess", color = 'red')
+
+#Optimization
+ggplot(learned, aes(bin, optimization)) +
+  geom_boxplot(mapping = aes(as.factor(bin), optimization)) +
+  geom_smooth(method = "loess") +
+  geom_smooth(mapping = aes(bin, y.hat), data = predict.optimization, method = "loess", color = 'red')
+
+#Fixation Duration
+ggplot(learned1, aes(bin, fixDuration)) +
+  geom_boxplot(mapping = aes(as.factor(bin), fixDuration)) +
+  geom_smooth(method = "loess") +
+  geom_smooth(mapping = aes(bin, y.hat), data = predict.fixDuration, method = "loess", color = 'red')
+
+#Fixation Count
+ggplot(learned, aes(bin, fixCount)) +
+  geom_boxplot(mapping = aes(as.factor(bin), fixCount)) +
+  geom_smooth(method = "loess") +
+  geom_smooth(mapping = aes(bin, y.hat), data = predict.fixCount, method = "loess", color = 'red')
 
 
-
-#best fit model for Accuracy (5th order polynomial and 1st order interactions) (added lag component)
-fit.mixed9 <- lmer(meanAccuracy ~ poly(bin, 5) + learner + optimization + poly(fixCount, 5) + bin:optimization + 
-  bin:fixCount + learner:optimization + learner:fixCount + optimization:fixCount + lag1 + (1 | subject), data = dat)
-summary(fit.mixed9)
-predict.mixed <- data.frame(y.hat = predict(fit.mixed9, dat), bin = dat$bin)
 
 
 
 #-----Model Fitting-----
 
-#base model
-fit.mixed <- lmer(meanAccuracy ~ condition + bin + learner (1 | subject), data = dat)
-summary(fit.mixed)
+#Accuracy
+#testing for nonlinear effect
+fit.accuracy1 <- lmer(meanAccuracy ~ bin + condition + (1 | subject), data = learned)
+summary(fit.accuracy1)
 
-#add all theoretically relevant variables
-fit.mixed2 <- lmer(meanAccuracy ~ condition + bin + learner + optimization + fixDuration + fixCount + (1 | subject), data = dat)
-summary(fit.mixed2)
+fit.accuracy2 <- lmer(meanAccuracy ~ poly(bin, 2) + condition + (1 | subject), data = learned)
+summary(fit.accuracy2)
 
-#adjust to statistically relevant variables
-fit.mixed3 <- lmer(meanAccuracy ~ bin + learner + optimization + fixCount + (1 | subject), data = dat)
-summary(fit.mixed3)
+fit.accuracy3 <- lmer(meanAccuracy ~ poly(bin, 3) + condition + (1 | subject), data = learned)
+summary(fit.accuracy3)
 
-anova(fit.mixed2, fit.mixed3)
-#fit.mixed doesn't have as many NAs, so it's a different size than the model 2 and 3 (anova throws an error)
-#there is no significant increase in explained variance in model 2, so proceed with model 3
+fit.accuracy4 <- lmer(meanAccuracy ~ poly(bin, 4) + condition + (1 | subject), data = learned)
+summary(fit.accuracy4)
 
+fit.accuracy5 <- lmer(meanAccuracy ~ poly(bin, 5) + condition + (1 | subject), data = learned)
+summary(fit.accuracy5)
 
-
-#test for nonlinear effects
-#see assumption checks for plots and testing of which variables have nonlinear effects
-
-#optimization was not compatible with the poly command, so I am currently leaving it out for nonlinear components
-fit.mixed4 <- lmer(meanAccuracy ~ poly(bin, 2) + learner + optimization + poly(fixCount, 2) + (1 | subject), data = dat)
-summary(fit.mixed4)
-
-fit.mixed5 <- lmer(meanAccuracy ~ poly(bin, 3) + learner + optimization + poly(fixCount, 3) + (1 | subject), data = dat)
-summary(fit.mixed5)
-
-fit.mixed6 <- lmer(meanAccuracy ~ poly(bin, 4) + learner + optimization + poly(fixCount, 4) + (1 | subject), data = dat)
-summary(fit.mixed6)
-
-fit.mixed7 <- lmer(meanAccuracy ~ poly(bin, 5) + learner + optimization + poly(fixCount, 5) + (1 | subject), data = dat)
-summary(fit.mixed7)
-
-fit.mixed8 <- lmer(meanAccuracy ~ poly(bin, 6) + learner + optimization + poly(fixCount, 6) + (1 | subject), data = dat)
-summary(fit.mixed8)
-
-anova(fit.mixed3, fit.mixed4, fit.mixed5, fit.mixed6, fit.mixed7, fit.mixed8)
-#with bonferroni correction (.05/5 = .01), fit.mixed7 is the best model (5th order polynomial)
+anova(fit.accuracy1, fit.accuracy2, fit.accuracy3, fit.accuracy4, fit.accuracy5)
+#4th order polynomial had the best fit
 
 
-#test for interaction effects
-fit.mixed9 <- lmer(meanAccuracy ~ poly(bin, 5) + learner + optimization + poly(fixCount, 5) + bin:optimization + 
-  bin:fixCount + learner:optimization + learner:fixCount + optimization:fixCount + (1 | subject), data = dat)
-summary(fit.mixed9)
 
-fit.mixed10 <- lmer(meanAccuracy ~ poly(bin, 5) + learner + optimization + poly(fixCount, 5) + bin:optimization + 
-  bin:fixCount + learner:optimization + learner:fixCount + optimization:fixCount + bin:optimization:fixCount + 
-  learner:optimization:fixCount + (1 | subject), data = dat)
-summary(fit.mixed10)
+#Optimization
+#testing if bin has a significant effect (that needs to be controlled)
+fit.optimization1 <- lmer(optimization ~ condition + (1 | subject), data = learned)
+summary(fit.optimization1)
 
-anova(fit.mixed7, fit.mixed9, fit.mixed10)
-#fit.mixed9 is the best overall
+fit.optimization2 <- lmer(optimization ~ bin + condition + (1 | subject), data = learned)
+summary(fit.optimization2)
+
+anova(fit.optimization1, fit.optimization2)
+#bin is significant and should be included
+
+
+
+#Fixation Duration
+#testing for nonlinear effect
+fit.fixDuration1 <- lmer(fixDuration ~ bin + condition + (1 | subject), data = learned1)
+summary(fit.fixDuration1)
+
+fit.fixDuration2 <- lmer(fixDuration ~ poly(bin, 2) + condition + (1 | subject), data = learned1)
+summary(fit.fixDuration2)
+
+fit.fixDuration3 <- lmer(fixDuration ~ poly(bin, 3) + condition + (1 | subject), data = learned1)
+summary(fit.fixDuration3)
+
+fit.fixDuration4 <- lmer(fixDuration ~ poly(bin, 4) + condition + (1 | subject), data = learned1)
+summary(fit.fixDuration4)
+
+fit.fixDuration5 <- lmer(fixDuration ~ poly(bin, 5) + condition + (1 | subject), data = learned1)
+summary(fit.fixDuration5)
+
+anova(fit.fixDuration1, fit.fixDuration2, fit.fixDuration3 , fit.fixDuration4, fit.fixDuration5)
+#3rd order polynomial had the best fit
+
+
+
+#Fixation Count
+#testing for nonlinear effect
+fit.fixCount1 <- lmer(fixCount ~ bin + condition + (1 | subject), data = learned)
+summary(fit.fixCount1)
+
+fit.fixCount2 <- lmer(fixCount ~ poly(bin, 2) + condition + (1 | subject), data = learned)
+summary(fit.fixCount2)
+
+fit.fixCount3 <- lmer(fixCount ~ poly(bin, 3) + condition + (1 | subject), data = learned)
+summary(fit.fixCount3)
+
+fit.fixCount4 <- lmer(fixCount ~ poly(bin, 4) + condition + (1 | subject), data = learned)
+summary(fit.fixCount4)
+
+anova(fit.fixCount1, fit.fixCount2, fit.fixCount3 , fit.fixCount4)
+#3rd order polynomial had the best fit
+
+
 
 
 
@@ -206,55 +260,126 @@ sd(learned$cp[learned$condition == "VR"])
 
 
 
-#ANOVA (errors are normally distributed, equal variance), robust to non-normality
-
-#Accuracy
-plot(fit.aov)
-#suggests non-normality, slight heteroscedasticity
-
-#Optimization
-plot(fit.aov2)
-#suggests non-normality
-
-#Fixation Duration
-plot(fit.aov3)
-#non-normality, heteroscedastic, and a high outlier
-
-#Fixation Count
-plot(fit.aov4)
-#non-normality
-
-
-
-
-
 #Modelling
 
-#I still need to complete all the assumption checking for the models
+
+#Accuracy
+
+#plot of residuals against fitted values
+plot(fit.accuracy)
+#suggests non-linearity (fixed)
+
+#index plot of residuals
+x <- c(1:length(resid(fit.accuracy)))
+y <- c(resid(fit.accuracy))
+plot(x, y, ylab = "Residuals", xlab = "Case Number")
+abline (0,0)
+#independent errors, no autocorrelation
+
+#qq plot of residuals
+qqnorm(resid(fit.accuracy))
+qqline(resid(fit.accuracy))
+#slight stray from normality
+
+#variance inflation factor
+vif(fit.accuracy)
+#no multicollinearity
+
+#shows any rows in data which residuals are greater than 2.5
+res1 <- resid(fit.accuracy, type = "pearson")
+learned[which(abs(res1) > 2.5),]
+#no extreme outliers
 
 
 
-#looking for nonlinear effects
-#bin
-ggplot(data.frame(x1=dat$bin[is.na(dat$optimization) == F],pearson=residuals(fit.mixed3,type="pearson")),
-       aes(x=x1,y=pearson)) +
-  geom_point() +
-  geom_smooth() +
-  theme_bw()
-#definitely nonlinear, maybe 2nd order
+#Optimization
 
-#optimization
-ggplot(data.frame(x1=dat$optimization[is.na(dat$optimization) == F],pearson=residuals(fit.mixed2,type="pearson")),
-       aes(x=x1,y=pearson)) +
-  geom_point() +
-  geom_smooth() +
-  theme_bw()
-#definitely nonlinear, maybe 3rd order
+#plot of residuals against fitted values
+plot(fit.optimization)
+#possible heteroscedasticity
 
-#fixation count
-ggplot(data.frame(x1=dat$fixCount[is.na(dat$optimization) == F],pearson=residuals(fit.mixed2,type="pearson")),
-       aes(x=x1,y=pearson)) +
-  geom_point() +
-  geom_smooth() +
-  theme_bw()
-#maybe nonlinear
+#index plot of residuals
+x <- c(1:length(resid(fit.optimization)))
+y <- c(resid(fit.optimization))
+plot(x, y, ylab = "Residuals", xlab = "Case Number")
+abline (0,0)
+#independent errors, no autocorrelation
+
+#qq plot of residuals
+qqnorm(resid(fit.optimization))
+qqline(resid(fit.optimization))
+#relatively normal
+
+#variance inflation factor
+vif(fit.optimization)
+#no multicollinearity
+
+#shows any rows in data which residuals are greater than 2.5
+res1 <- resid(fit.optimization, type = "pearson")
+learned[which(abs(res1) > 2.5),]
+#no extreme outliers
+
+
+
+#Fixation Duration
+
+#plot of residuals against fitted values
+plot(fit.fixDuration)
+#slightly heteroscedastic, several extreme outliers (fixed), non-linear (fixed)
+
+#index plot of residuals
+x <- c(1:length(resid(fit.fixDuration)))
+y <- c(resid(fit.fixDuration))
+plot(x, y, ylab = "Residuals", xlab = "Case Number")
+abline (0,0)
+#independent errors, no autocorrelation
+
+#qq plot of residuals
+qqnorm(resid(fit.fixDuration))
+qqline(resid(fit.fixDuration))
+#slight stray from normality
+
+#variance inflation factor
+vif(fit.fixDuration)
+#no multicollinearity
+
+#shows any rows in data which residuals are greater than 2.5
+res1 <- resid(fit.fixDuration, type = "pearson")
+learned[which(abs(res1) > 2.5),]
+#data are very scattered, lots of variance, but no other extreme outliers
+
+#get the subject number of any fixations over 10000
+learned$subject[learned$fixDuration > 10000]
+#one trial from subject 20414 and all trials from subject 30513 (these trials are excluded)
+
+
+
+#Fixation Count
+
+#plot of residuals against fitted values
+plot(fit.fixCount)
+#slightly heteroscedastic, suggests non-linearity (fixed)
+
+#index plot of residuals
+x <- c(1:length(resid(fit.fixCount)))
+y <- c(resid(fit.fixCount))
+plot(x, y, ylab = "Residuals", xlab = "Case Number")
+abline (0,0)
+#independent errors, no autocorrelation
+
+#qq plot of residuals
+qqnorm(resid(fit.fixCount))
+qqline(resid(fit.fixCount))
+#slight stray from normality
+
+#variance inflation factor
+vif(fit.fixCount)
+#no multicollinearity
+
+#shows any rows in data which residuals are greater than 2.5
+res1 <- resid(fit.fixCount, type = "pearson")
+learned[which(abs(res1) > 2.5),]
+#a lot of variance, subject 20420 trial 1 may be an outlier, but was not removed
+
+
+
