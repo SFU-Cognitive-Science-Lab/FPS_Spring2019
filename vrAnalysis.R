@@ -130,25 +130,25 @@ predict.fixCount <- data.frame(y.hat = predict(fit.fixCount, learned), bin = lea
 #this is a boxplot with smooth line for the dataset (blue) and smooth line for best model (red)
 #Accuracy
 ggplot(learned, aes(bin, meanAccuracy)) +
-  geom_boxplot(mapping = aes(as.factor(bin), meanAccuracy)) +
+  geom_boxplot(mapping = aes(as.factor(bin), meanAccuracy, color = condition)) +
   geom_smooth(method = "loess") +
   geom_smooth(mapping = aes(bin, y.hat), data = predict.accuracy, method = "loess", color = 'red')
 
 #Optimization
 ggplot(learned, aes(bin, optimization)) +
-  geom_boxplot(mapping = aes(as.factor(bin), optimization)) +
+  geom_boxplot(mapping = aes(as.factor(bin), optimization, color = condition)) +
   geom_smooth(method = "loess") +
   geom_smooth(mapping = aes(bin, y.hat), data = predict.optimization, method = "loess", color = 'red')
 
 #Fixation Duration
 ggplot(learned1, aes(bin, fixDuration)) +
-  geom_boxplot(mapping = aes(as.factor(bin), fixDuration)) +
+  geom_boxplot(mapping = aes(as.factor(bin), fixDuration, color = condition)) +
   geom_smooth(method = "loess") +
   geom_smooth(mapping = aes(bin, y.hat), data = predict.fixDuration, method = "loess", color = 'red')
 
 #Fixation Count
 ggplot(learned, aes(bin, fixCount)) +
-  geom_boxplot(mapping = aes(as.factor(bin), fixCount)) +
+  geom_boxplot(mapping = aes(as.factor(bin), fixCount, color = condition)) +
   geom_smooth(method = "loess") +
   geom_smooth(mapping = aes(bin, y.hat), data = predict.fixCount, method = "loess", color = 'red')
 
