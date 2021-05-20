@@ -4,6 +4,9 @@
 This repository represents the original source code used for the Standard Computer Interface condition of the experiment.
 One of the 2018 or 2019 versions of Unity should work for building the project.
 
+See https://github.com/SFU-Cognitive-Science-Lab/VR_Fall2018_1 for the original VR game that this condition is based on.
+The main changes where the addition of code to all the experiment to be controlled by a standard game controller.
+
 To avoid resource issues on the host, it is recommended to build an .exe and run the experiment using the .exe.
 
 Before running this either via the Unity editor or the stand alone .exe make sure to copy the experiments.config.txt
