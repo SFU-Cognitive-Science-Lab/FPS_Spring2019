@@ -5,7 +5,6 @@ This repository represents the original source code used for the Standard Comput
 One of the 2018 or 2019 versions of Unity should work for building the project.
 
 To avoid resource issues on the host, it is recommended to build an .exe and run the experiment using the .exe.
-See https://github.com/SFU-Cognitive-Science-Lab/InProgress/tree/master/CategoryVR/ExpConditions/VR for a sample.
 
 Before running this either via the Unity editor or the stand alone .exe make sure to copy the experiments.config.txt
 file to the Desktop directory. The VR program bootstraps itself by looking for this file. 
