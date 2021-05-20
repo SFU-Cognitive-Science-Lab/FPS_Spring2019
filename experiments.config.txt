@@ -1,0 +1,12 @@
+# file used by Assets/Scripts/DataFarmer.cs 
+# should be placed in the Desktop directory for the user running the experiment
+# there are other parameters that can be invoked see DataFarmer.cs for these
+ 
+# this path should be the same as that of the arrangements.json in this repository
+arrangements:arrangements.json
+
+# reduce the number of trials for testing
+trials:240
+
+# an actual password is only needed for connecting to the web service
+password:none
